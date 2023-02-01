@@ -4,6 +4,8 @@
 #include <sys/stat.h>
 #include <dirent.h>
 
+#define MAX_SIZE 10000
+
 void tedad_curly_brackets(char str[], int bra[], int ket[])
 {
     int j = 0;
@@ -48,14 +50,16 @@ void space_remover(char str[], char jaygozin[], int bra[], int ket[])
         y = search(i, ket);
         if(str[i] == '{' && ket[x] != -1)
         {
+            int counting = 0;
             aghabgard = temp-1;
             while(jaygozin[aghabgard] == ' ' && aghabgard != -1)
             {
                 aghabgard--;
+                counting++;
             }
             if(aghabgard != -1)
             {
-                if(str[i-1] != '{' && str[i-1] != '}' )
+                if(str[i-counting] != '{' && str[i-counting] != '}' )
                 {
                     aghabgard++;
                     jaygozin[aghabgard] = ' ';
@@ -983,7 +987,7 @@ int space_wildcard(char fileaddress[])
 int createfile(char tag[], char fileaddress[])
 {
     int i = 0;
-    char dir_name[100];
+    char dir_name[MAX_SIZE];
     int check = 0;
     int dir_name_length;
     dir_name_length = 0;
@@ -1034,7 +1038,7 @@ int createfile(char tag[], char fileaddress[])
 void createfile_undo(char fileaddress[])
 {
     int i = 0;
-    char dir_name[100];
+    char dir_name[MAX_SIZE];
     int check = 0;
     int dir_name_length;
     dir_name_length = 0;
@@ -1135,7 +1139,7 @@ void copy_f(FILE* x, FILE* y, char fileaddress[], char str[], int line_pos, int 
     while(line_pos > 1)
     {
         line_pos--;
-        fgets(str, 100, x);
+        fgets(str, MAX_SIZE, x);
     }
     while(start_pos > 0)
     {
@@ -1202,7 +1206,7 @@ void insert(FILE* filename, FILE* copy, int line_pos, int start_pos, char passag
     while(line_pos > 1)
     {
         line_pos--;
-        fgets(str, 100, filename);
+        fgets(str, MAX_SIZE, filename);
         fputs(str, copy);
     }
     while(start_pos > 0)
@@ -1263,7 +1267,7 @@ void remove_f(FILE* filename, FILE* copy, int line_pos, int start_pos, char file
     while(line_pos > 1)
     {
         line_pos--;
-        fgets(str, 100, filename);
+        fgets(str, MAX_SIZE, filename);
         fputs(str, copy);
     }
     while(start_pos > 0)
@@ -1356,7 +1360,7 @@ void remove_b(FILE* filename, FILE* coping, char fileaddress[], int line_pos, in
 
 void tree(int depth, char address[], int remember)
 {
-    char temp[1000];
+    char temp[MAX_SIZE];
     int tab;
     int x;
     struct dirent *fd;
@@ -1411,30 +1415,30 @@ void directory_show(char *fileaddress)
 
 int main()
 {
-    char command[100];
+    char command[MAX_SIZE];
     scanf("%s", command);
     char c;
-    char tag[100];
-    char tag_new[100];
-    char passage[100];
-    char passage_new[100];
+    char tag[MAX_SIZE];
+    char tag_new[MAX_SIZE];
+    char passage[MAX_SIZE];
+    char passage_new[MAX_SIZE];
     int start_pos, line_pos;
-    char fileaddress[100];
+    char fileaddress[MAX_SIZE];
     int i, x, count;
     int char_num;
-    char str[100];
-    char comparing[100];
-    char str1[100];
-    char str2[100];
+    char str[MAX_SIZE];
+    char comparing[MAX_SIZE];
+    char str1[MAX_SIZE];
+    char str2[MAX_SIZE];
     char c1, c2;
-    char ufileaddress[100];
+    char ufileaddress[MAX_SIZE];
     int check_command, check_exist;
-    char jaygozin[100];
-    char str_zegond[100];
-    char str_prime[100];
-    int bra[1000];
-    int ket[1000];
-    char new_face[1000];
+    char jaygozin[MAX_SIZE];
+    char str_zegond[MAX_SIZE];
+    char str_prime[MAX_SIZE];
+    int bra[MAX_SIZE];
+    int ket[MAX_SIZE];
+    char new_face[MAX_SIZE];
 
     while(1)
     {
@@ -1700,7 +1704,7 @@ int main()
                 while(line_pos > 1)
                 {
                     line_pos--;
-                    fgets(str, 100, filename);
+                    fgets(str, MAX_SIZE, filename);
                     fputs(str, help);
                 }
                 while(start_pos > 0)
@@ -1816,7 +1820,7 @@ int main()
             while(line_pos > 1)
             {
                 line_pos--;
-                fgets(str, 100, filename);
+                fgets(str, MAX_SIZE, filename);
                 fputs(str, help);
             }
             while(start_pos > 0)
@@ -2108,7 +2112,7 @@ int main()
                 while(counter2 <= line_count2)
                 {
                     counter2++;
-                    fgets(str2, 100, filecompare);
+                    fgets(str2, MAX_SIZE, filecompare);
                     printf("%s", str2);
                 }
                 printf("\n");
@@ -2119,7 +2123,7 @@ int main()
                 while(counter1 <= line_count1)
                 {
                     counter1++;
-                    fgets(str1, 100, filename);
+                    fgets(str1, MAX_SIZE, filename);
                     printf("%s", str1);
                 }
                 printf("\n");
@@ -2172,7 +2176,7 @@ int main()
                     filename = fopen(fileaddress, "r");
                     while(tedad_lines > 0)
                     {
-                        fgets(str, 100, filename);
+                        fgets(str, MAX_SIZE, filename);
                         khoruji = str_find(str ,passage);
                         if(khoruji == 1)
                         {
@@ -2188,7 +2192,7 @@ int main()
                 filename = fopen(fileaddress, "r");
                 while(tedad_lines > 0)
                 {
-                    fgets(str, 100, filename);
+                    fgets(str, MAX_SIZE, filename);
                     khoruji = str_find(str ,passage);
                     if(khoruji == 1)
                     {
@@ -2215,7 +2219,7 @@ int main()
                     filename = fopen(fileaddress, "r");
                     while(tedad_lines > 0)
                     {
-                        fgets(str, 100, filename);
+                        fgets(str, MAX_SIZE, filename);
                         khoruji = str_find(str ,passage);
                         if(khoruji == 1 && tedad_lines != 1)
                         {
@@ -2235,7 +2239,7 @@ int main()
                 filename = fopen(fileaddress, "r");
                 while(tedad_lines > 0)
                 {
-                    fgets(str, 100, filename);
+                    fgets(str, MAX_SIZE, filename);
                     khoruji = str_find(str ,passage);
                     if(khoruji == 1)
                     {
@@ -2261,7 +2265,7 @@ int main()
                     filename = fopen(fileaddress, "r");
                     while(tedad_lines > 0)
                     {
-                        fgets(str, 100, filename);
+                        fgets(str, MAX_SIZE, filename);
                         khoruji = str_find(str ,passage);
                         if(khoruji == 1 && tedad_lines != 1)
                         {
@@ -2283,7 +2287,7 @@ int main()
                 filename = fopen(fileaddress, "r");
                 while(tedad_lines > 0)
                 {
-                    fgets(str, 100, filename);
+                    fgets(str, MAX_SIZE, filename);
                     khoruji = str_find(str ,passage);
                     if(khoruji == 1)
                     {
