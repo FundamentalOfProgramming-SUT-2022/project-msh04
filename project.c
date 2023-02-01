@@ -4,6 +4,296 @@
 #include <sys/stat.h>
 #include <dirent.h>
 
+void tedad_curly_brackets(char str[], int bra[], int ket[])
+{
+    int j = 0;
+    for(int i = 0; i < strlen(str); i++)
+    {
+        ket[i] = -1;
+    }
+    ket[strlen(str)] = '\0';
+    for(int i = 0; i < strlen(str); i++)
+    {
+        if(str[i] == '{')
+        {
+            bra[j] = i;
+            j++;
+        }
+        if(str[i] == '}')
+        {
+            for(int k = j-1; k >= 0; k--)
+            {
+                if(ket[k] == -1)
+                {
+                    ket[k] = i;
+                    break;
+                }
+            }
+        }
+    }
+    bra[j] = -1;
+    ket[j] = -1;
+}
+
+void space_remover(char str[], char jaygozin[], int bra[], int ket[])
+{
+    int count = 0;
+    int i = 0;
+    int temp = 0;
+    int aghabgard = 0;
+    int x, y;
+    while(str[i] != '\0')
+    {
+        x = search(i, bra);
+        y = search(i, ket);
+        if(str[i] == '{' && ket[x] != -1)
+        {
+            aghabgard = temp-1;
+            while(jaygozin[aghabgard] == ' ' && aghabgard != -1)
+            {
+                aghabgard--;
+            }
+            if(aghabgard != -1)
+            {
+                if(str[i-1] != '{' && str[i-1] != '}' )
+                {
+                    aghabgard++;
+                    jaygozin[aghabgard] = ' ';
+                }
+                if(str[i-1] == '}')
+                {
+                    y = search(i-1, ket);
+                    if(y == -1)
+                    {
+                        aghabgard++;
+                        jaygozin[aghabgard] = ' ';
+                    }
+                }
+            }
+            aghabgard++;
+            jaygozin[aghabgard] = '{';
+            aghabgard++;
+            temp = aghabgard;
+            i++;
+            x = search(i, bra);
+            while(str[i] == ' ')
+            {
+                i++;
+                x = search(i, bra);
+            }
+            if(str[i] == '{')
+            {
+                continue;
+            }
+            jaygozin[temp] = str[i];
+            i++;
+            temp++;
+            continue;
+        }
+        else if(str[i] == '}' && y != -1)
+        {
+            aghabgard = temp-1;
+            while(jaygozin[aghabgard] == ' ' && aghabgard != -1)
+            {
+                aghabgard--;
+            }
+            aghabgard++;
+            jaygozin[aghabgard] = '}';
+            temp = ++aghabgard;
+            i++;
+            while(str[i] == ' ')
+            {
+                i++;
+            }
+            if(str[i] == '{')
+            {
+                    continue;
+            }
+            jaygozin[temp] = str[i];
+            temp++;
+            i++;
+            continue;
+        }
+        else
+        {
+            jaygozin[temp] = str[i];
+            i++;
+            temp++;
+        }
+    }
+    jaygozin[temp] = '\0';
+}
+
+int search(int a, int array[])
+{
+    int i = 0;
+    while(array[i] != -1)
+    {
+        if(array[i] == a)
+        {
+            return i;
+        }
+        i++;
+    }
+    return -1;
+}
+
+void convert_to_indent(char str[], char jaygozin[], int ket[], int bra[])
+{
+    int i = 0;
+    int check = 0;
+    int x;
+    int temp = 0;
+    int tmp = 0;
+    int count = 0;
+    while(str[i] != '\0')
+    {
+        if(str[i] == '{')
+        {
+            jaygozin[temp] = '{';
+            temp++;
+            if(ket[search(i, bra)] != -1)
+            {
+                jaygozin[temp] = '\n';
+                temp++;
+            }
+        }
+        else if(str[i] == '}')
+        {
+            x = search(i, ket);
+            if(x != -1)
+            {
+                x = search(i-1, ket);
+                if(str[i-1] != '{' && search(i-1, ket) == -1)
+                {
+                    jaygozin[temp] = '\n';
+                    temp++;
+                }
+                jaygozin[temp] = '}';
+                temp++;
+                jaygozin[temp] = '\n';
+                temp++;
+            }
+            else
+            {
+                jaygozin[temp] = '}';
+                temp++;
+            }
+        }
+        else
+        {
+            jaygozin[temp] = str[i];
+            temp++;
+        }
+        i++;
+    }
+    jaygozin[temp] = '\0';
+}
+
+
+void put_tab(char str[], char jaygozin[])
+{
+    int i = 0;
+    int count = 0;
+    int tmp, temp = 0;
+    while(str[i] != '\0')
+    {
+        jaygozin[temp] = str[i];
+        temp++;
+        if(str[i] == '\n')
+        {
+            if(str[i-1] == '{')
+            {
+                if(str[i+1] != '}')
+                {
+                    count++;
+                    tmp = count;
+                    while(tmp > 0)
+                    {
+                        jaygozin[temp] = '\t';
+                        temp++;
+                        tmp--;
+                    }
+                }
+                else
+                {
+                    tmp = count;
+                    while(tmp > 0)
+                    {
+                        jaygozin[temp] = '\t';
+                        temp++;
+                        tmp--;
+                    }
+                }
+
+            }
+            else if(str[i-1] == '}')
+            {
+                if(str[i+1] == '}')
+                {
+                    if(count > 0)
+                    {
+                        count--;
+                    }
+                    tmp = count;
+                    while (tmp > 0)
+                    {
+                        jaygozin[temp] = '\t';
+                        temp++;
+                        tmp--;
+                    }
+                }
+                else
+                {
+                    tmp = count;
+                    while (tmp > 0)
+                    {
+                        jaygozin[temp] = '\t';
+                        temp++;
+                        tmp--;
+                    }
+                }
+            }
+            else
+            {
+                if(str[i+1] == '}')
+                {
+                    if(count > 0)
+                    {
+                        count--;
+                    }
+                    tmp = count;
+                    while (tmp > 0)
+                    {
+                        jaygozin[temp] = '\t';
+                        temp++;
+                        tmp--;
+                    }
+                }
+                else
+                {
+                    tmp = count;
+                    while (tmp > 0)
+                    {
+                        jaygozin[temp] = '\t';
+                        temp++;
+                        tmp--;
+                    }
+                }
+            }
+        }
+        i++;
+    }
+    if(jaygozin[temp-1] == '\n')
+    {
+        jaygozin[temp-1] = '\0';
+    }
+    else
+    {
+        jaygozin[temp] = '\0';
+    }
+}
+
 int line_number(FILE* filename, char fileaddress[])
 {
     int count = 0;
@@ -242,8 +532,8 @@ int find(FILE* filename, char fileaddress[], char passage[], int output, int cou
                     if(c == EOF)
                     {
                         check = 1;
-                        break;
                         khoruji = -1;
+                        break;
                     }
                 }
             }
@@ -295,6 +585,124 @@ int find(FILE* filename, char fileaddress[], char passage[], int output, int cou
                     break;
                 }
 
+            }
+        }
+        if(check == 0 && counter == 1)
+        {
+            fclose(filename);
+            return -1;
+        }
+        counter--;
+    }
+}
+
+
+int replace(FILE* filename, char fileaddress[], char passage[], int output, int counter, int* func_output)
+{
+    long long int count, khoruji, check;
+    char c;
+    int i = 0;
+    count = 0;
+    int last_index;
+    int ret = 0;
+    long long int remember = 0;
+    filename = fopen(fileaddress, "r");
+    int check_counter = counter;
+    while(counter >= 1)
+    {
+        c = fgetc(filename);
+        if(check_counter != counter)
+        {
+            count++;
+        }
+        check = 0;
+        khoruji = -1;
+        while(c != EOF)
+        {
+            i = 0;
+            if(c == ' ' || c == '\0' || c == EOF)
+            {
+                remember = count+1;
+            }
+            if(c == passage[0])
+            {
+                khoruji = count;
+                while(c == passage[i])
+                {
+                    c = fgetc(filename);
+                    count++;
+                    i++;
+                    if(passage[i] == '\0')
+                    {
+                        check = 1;
+                        break;
+                    }
+                    if(c == EOF)
+                    {
+                        check = 1;
+                        khoruji = -1;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                c = fgetc(filename);
+                count++;
+            }
+            if(output == 1 && check == 1)
+            {
+                if(c == ' ' || c == EOF || c == '\0')
+                {
+                    khoruji = -1;
+                    check = 0;
+                }
+                else
+                {
+                    if(counter == 1 && khoruji != -1)
+                    {
+                        while(c != EOF && c != ' ')
+                        {
+                            c = fgetc(filename);
+                            count++;
+                        }
+                        last_index = count-1;
+                        *func_output = last_index;
+                        fclose(filename);
+                        return khoruji;
+                    }
+                    break;
+                }
+            }
+            if(check == 1 && output == 0)
+            {
+                if(counter == 1)
+                {
+                    fclose(filename);
+                    last_index = count-1;
+                    *func_output = last_index;
+                    return khoruji;
+                }
+                break;
+            }
+            if(output == -1 && check == 1)
+            {
+                if(remember == khoruji)
+                {
+                    khoruji = -1;
+                    check = 0;
+                }
+                else
+                {
+                    if(counter == 1)
+                    {
+                        fclose(filename);
+                        last_index = count-1;
+                        *func_output = last_index;
+                        return remember;
+                    }
+                    break;
+                }
             }
         }
         if(check == 0 && counter == 1)
@@ -1009,6 +1417,7 @@ int main()
     char tag[100];
     char tag_new[100];
     char passage[100];
+    char passage_new[100];
     int start_pos, line_pos;
     char fileaddress[100];
     int i, x, count;
@@ -1020,13 +1429,57 @@ int main()
     char c1, c2;
     char ufileaddress[100];
     int check_command, check_exist;
-
+    char jaygozin[100];
+    char str_zegond[100];
+    char str_prime[100];
+    int bra[1000];
+    int ket[1000];
+    char new_face[1000];
 
     while(1)
     {
         if(!strcmp(command, "exit"))
         {
             return 0;
+        }
+        if(!strcmp(command, "auto-indent"))
+        {
+            getchar();
+            enter(fileaddress);
+            create_undo(fileaddress, ufileaddress);
+            FILE* filename;
+            filename = fopen(fileaddress, "r");
+            FILE* undo;
+            undo = fopen(ufileaddress, "w");
+            copy(filename, undo);
+            fclose(filename);
+            fclose(undo);
+            FILE* helper;
+            helper = fopen("help.txt", "w");
+            filename = fopen(fileaddress, "r");
+            c = fgetc(filename);
+            int i = 0;
+            while(c != EOF)
+            {
+                str[i] = c;
+                i++;
+                c = fgetc(filename);
+
+            }
+            str[i] = '\0';
+            tedad_curly_brackets(str, bra, ket);
+            space_remover(str, str_prime, bra, ket);
+            tedad_curly_brackets(str_prime, bra, ket);
+            convert_to_indent(str_prime, str_zegond, ket, bra);
+            put_tab(str_zegond, new_face);
+            fputs(new_face, helper);
+            fclose(filename);
+            fclose(helper);
+            filename = fopen(fileaddress, "w");
+            helper = fopen("help.txt", "r");
+            copy(helper, filename);
+            fclose(filename);
+            fclose(helper);
         }
         if(!strcmp(command, "createfile"))
         {
@@ -1414,6 +1867,7 @@ int main()
             if(fopen(fileaddress, "r") == 0)
             {
                 check_exist = 1;
+                printf("there isn't any file with this address\n");
             }
             if(y == 0 && check_exist == 0)
             {
@@ -1852,6 +2306,192 @@ int main()
             else
             {
                 tree(depth, "./root", depth);
+            }
+        }
+        if(!strcmp(command, "replace"))
+        {
+            scanf("%s", tag);
+            getchar();
+            x = space_wildcard(passage);
+            scanf("%s", tag);
+            getchar();
+            space(passage_new);
+            scanf("%s", tag);
+            getchar();
+            int counter;
+            int y = vorud(fileaddress);
+            create_undo(fileaddress, ufileaddress);
+            FILE* filename;
+            filename = fopen(fileaddress, "r");
+            FILE* undo;
+            undo = fopen(ufileaddress, "w");
+            copy(filename, undo);
+            fclose(filename);
+            fclose(undo);
+            FILE* helper;
+            if(fopen(fileaddress, "r") == 0)
+            {
+                check_exist = 1;
+                printf("there isn't any file with this address\n");
+            }
+            if(check_exist == 0 && y == 0)
+            {
+                int end_pos = 0;
+                start_pos = replace(filename, fileaddress, passage, x, 1, &end_pos);
+                counter = 0;
+                filename = fopen(fileaddress, "r");
+                helper = fopen("help.txt", "w");
+                if(start_pos != -1)
+                {
+                    while(counter < start_pos)
+                    {
+                        c = fgetc(filename);
+                        fputc(c, helper);
+                        counter++;
+                    }
+                    while(counter <= end_pos)
+                    {
+                        c = fgetc(filename);
+                        counter++;
+                    }
+                    fputs(passage_new, helper);
+                    while(c != EOF)
+                    {
+                        c = fgetc(filename);
+                        fputc(c, helper);
+                    }
+                    fclose(filename);
+                    fclose(helper);
+                    filename = fopen(fileaddress, "w");
+                    helper = fopen("help.txt", "r");
+                    copy(helper, filename);
+                    fclose(filename);
+                    fclose(helper);
+                    printf("replacing was successfuly\n");
+                }
+                else
+                {
+                    printf("pattern not found :|\n");
+                }
+            }
+            if(check_exist == 0 && y == 1)
+            {
+                scanf("%s", tag);
+                if(!strcmp(tag, "-at"))
+                {
+                    c = getchar();
+                    scanf("%d", &counter);
+                    c = getchar();
+                    if(c == ' ')
+                    {
+                        scanf("%s", tag);
+                        if(!strcmp(tag, "-all"))
+                        {
+                            printf("you can't use this attributes at a moment\n");
+                        }
+                        else
+                        {
+                            printf("invalid command\n");
+                        }
+                    }
+                    if(c == '\n')
+                    {
+                        int end_pos = 0;
+                        start_pos = replace(filename, fileaddress, passage, x, counter, &end_pos);
+                        counter = 0;
+                        filename = fopen(fileaddress, "r");
+                        helper = fopen("help.txt", "w");
+                        if(start_pos != -1)
+                        {
+                            while(counter < start_pos)
+                            {
+                                c = fgetc(filename);
+                                fputc(c, helper);
+                                counter++;
+                            }
+                            while(counter <= end_pos)
+                            {
+                                c = fgetc(filename);
+                                counter++;
+                            }
+                            fputs(passage_new, helper);
+                            while(c != EOF)
+                            {
+                                c = fgetc(filename);
+                                fputc(c, helper);
+                            }
+                            fclose(filename);
+                            fclose(helper);
+                            filename = fopen(fileaddress, "w");
+                            helper = fopen("help.txt", "r");
+                            copy(helper, filename);
+                            fclose(filename);
+                            fclose(helper);
+                            printf("replacing was successfuly\n");
+                        }
+                        else
+                        {
+                            printf("pattern not found :|\n");
+                        }
+                    }
+                }
+                if(!strcmp("-all", tag))
+                {
+                    c = getchar();
+                    if(c == ' ')
+                    {
+                        scanf("%s", tag);
+                        if(!strcmp(tag, "-at"))
+                        {
+                            printf("you can't use this attributes at a moment\n");
+                        }
+                        else
+                        {
+                            printf("invalid command\n");
+                        }
+                    }
+                    if(c == '\n')
+                    {
+                        int z = find_count(filename, fileaddress, passage, x);
+                        while(z > 0)
+                        {
+                            int end_pos = 0;
+                            start_pos = replace(filename, fileaddress, passage, x, z, &end_pos);
+                            counter = 0;
+                            if(start_pos != -1)
+                            {
+                                filename = fopen(fileaddress, "r");
+                                helper = fopen("help.txt", "w");
+                                while(counter < start_pos)
+                                {
+                                    c = fgetc(filename);
+                                    fputc(c, helper);
+                                    counter++;
+                                }
+                                while(counter <= end_pos)
+                                {
+                                    c = fgetc(filename);
+                                    counter++;
+                                }
+                                fputs(passage_new, helper);
+                                while(c != EOF)
+                                {
+                                    c = fgetc(filename);
+                                    fputc(c, helper);
+                                }
+                                fclose(filename);
+                                fclose(helper);
+                                filename = fopen(fileaddress, "w");
+                                helper = fopen("help.txt", "r");
+                                copy(helper, filename);
+                                fclose(filename);
+                                fclose(helper);
+                            }
+                            z--;
+                        }
+                        printf("replacing was successfuly\n");
+                    }
+                }
             }
         }
         scanf("%s", command);
